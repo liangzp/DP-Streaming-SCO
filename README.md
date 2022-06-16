@@ -16,11 +16,12 @@ If you wish to use our repository in your work, please cite our paper:
 
 BibTex:
 ```
-@article{han2021generalized,
-  title={Generalized Linear Bandits with Local Differential Privacy},
-  author={Han, Yuxuan and Liang, Zhipeng and Wang, Yang and Zhang, Jiheng},
-  journal={Advances in Neural Information Processing Systems},
-  year={2021}
+@inproceedings{han2022dpsteaming,
+  title={Optimal Private Streaming SCO in $\ell_p$-geometry with Applications in High Dimensional Online Decision Making},
+  author={Han, Yuxuan and Liang, Zhicong and Liang, Zhipeng and Wang, Yang and Yao, Yuan and Zhang, Jiheng},
+  booktitle={International Conference on Machine Learning},
+  year={2022},
+  organization={PMLR}
 }
 ```
 
