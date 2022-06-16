@@ -34,6 +34,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Generating the figures in the paper:
 
 For generating the figures in the paper please execute the following codes:
+1. run the instances to generate the required experiment results data
 ```
 nohup bash execute.sh &
 ```
+
+2. run **summarize.py** to collect all the statistic from the experiments meta-data
+```
+python3 summarize.py
+```
+3. run **plot-curves-paper-p1.5.ipynb/plot-curves-paper-pinf.ipynb/plot-curves-bandit.ipynb** to generate the figures and tables for the "p=1.5"/"p=inf"/"bandit" part.
