@@ -107,7 +107,7 @@ if __name__ == '__main__':
         if abs(p-1.0)>1e-5 or str(p)=='inf':
             result_folder = 'dpsco-results'
         else:
-            result_folder = 'bandits-results-2'
+            result_folder = 'bandits-results'
         folder_name = "../{}/p={}-d={}-T={}-scale={}-noise_free={}-test_flag={}/".format(result_folder, str(p), str(d), str(T), str(scale),str(noise_free),str(test_flag))
         if not folder_name in results_dict:
             results_dict[folder_name] = dict()
