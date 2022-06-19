@@ -44,3 +44,7 @@ nohup bash execute.sh &
 python3 summarize.py
 ```
 3. run **plot-curves-paper-p1.5.ipynb/plot-curves-paper-pinf.ipynb/plot-curves-bandit.ipynb** to generate the figures and tables for the "p=1.5"/"p=inf"/"bandit" part.
+
+## Generating the table in the paper:
+ 
+run **summarize_table.ipynb** notebook to generate the Table 1 and 2 in the paper.
