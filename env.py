@@ -30,15 +30,15 @@ class SCO_steam_env:
 
         self.logger.record('time', time.time())
 
-        theta = np.random.normal(0, self.x_std, size = (self.d, 1))
+        #theta = np.random.normal(0, self.x_std, size = (self.d, 1))
         xs = np.random.normal(0, self.x_std, size=(self.T, self.d))
             # x /= np.abs(x).max()
-        xs /= np.linalg.norm(xs, self.q, axis = 2, keepdims= True)
+        xs /= np.linalg.norm(xs, self.q, axis = 1, keepdims= True)
         ys = xs.dot(theta)+ np.random.normal(0, self.y_std, size=(self.T, 1))
 
         for t in range(self.T):
             x, y = xs[[t]], ys[[t]]
-            self.algo.update(x, y, self.T, t)
+            self.algo.update(x.T, y, self.T, t)
             self.logger.record('est_error', np.linalg.norm(self.algo.theta_hat - theta) ** 2)
 
         self.theta_hat = self.algo.theta_hat
@@ -52,7 +52,7 @@ class SCO_steam_env:
         self.logger.record('baseline', self.baseline)
         self.logger.record('end time', time.time())
 
-        
+
 
 
 

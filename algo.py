@@ -164,6 +164,7 @@ class OFW_ple2(Algo):
         self.sigma_plus = self.get_sigma_plus()
 
         self.noises = self.get_noise()
+        self.noise_by_step = self.get_noise_by_step()
 
     def get_sigma_plus(self):
         logn = np.ceil(np.log2(self.T)) + 1
@@ -199,13 +200,29 @@ class OFW_ple2(Algo):
                     node_idx.append(node_idx[-1] + int(idx, 2))
         return node_idx
 
+    # def get_Gt(self, t):
+    #     noise_idx = np.array(self.get_noise_idx(t)) - 1
+    #     if self.noise_free:
+    #         noise = np.zeros(shape=self.size_SCO)
+    #     else:
+    #         noise = self.noises[:, noise_idx].sum(axis=1)
+    #     return self.Gt + noise.reshape(self.size_SCO)
+
+    def get_noise_by_step(self):
+        noise_by_step = []
+
+        for t in range(1, self.T+1):
+            noise_idx = np.array(self.get_noise_idx(t)) - 1
+            if self.noise_free:
+                noise = np.zeros(shape=self.size_SCO)
+            else:
+                noise = self.noises[:, noise_idx].sum(axis=1)
+            noise_by_step.append(noise)
+
+        return np.array(noise_by_step)
+
     def get_Gt(self, t):
-        noise_idx = np.array(self.get_noise_idx(t)) - 1
-        if self.noise_free:
-            noise = np.zeros(shape=self.size_SCO)
-        else:
-            noise = self.noises[:, noise_idx].sum(axis=1)
-        return self.Gt + noise.reshape(self.size_SCO)
+        return self.Gt + self.noise_by_step[t-1].reshape(self.size_SCO)
 
 
     def update(self, x, y, T, t):
@@ -421,6 +438,8 @@ class OFW_pge2(Algo):
         self.sigma_plus = self.get_sigma_plus()
         self.noises = self.get_noise()
 
+        self.noise_by_step = self.get_noise_by_step()
+
     def get_sigma_plus(self):
         logn = np.ceil(np.log2(self.T)) + 1
         sigma_plus_2 = 8 * logn ** 2 * np.log(logn / self.delta) * (
@@ -455,13 +474,29 @@ class OFW_pge2(Algo):
                     node_idx.append(node_idx[-1] + int(idx, 2))
         return node_idx
 
+    # def get_Gt(self, t):
+    #     noise_idx = np.array(self.get_noise_idx(t)) - 1
+    #     if self.noise_free:
+    #         noise = np.zeros(shape=self.size_SCO)
+    #     else:
+    #         noise = self.noises[:, noise_idx].sum(axis=1)
+    #     return self.Gt + noise.reshape(self.size_SCO)
+
+    def get_noise_by_step(self):
+        noise_by_step = []
+
+        for t in range(1, self.T+1):
+            noise_idx = np.array(self.get_noise_idx(t)) - 1
+            if self.noise_free:
+                noise = np.zeros(shape=self.size_SCO)
+            else:
+                noise = self.noises[:, noise_idx].sum(axis=1)
+            noise_by_step.append(noise)
+
+        return np.array(noise_by_step)
+
     def get_Gt(self, t):
-        noise_idx = np.array(self.get_noise_idx(t)) - 1
-        if self.noise_free:
-            noise = np.zeros(shape=self.size_SCO)
-        else:
-            noise = self.noises[:, noise_idx].sum(axis=1)
-        return self.Gt + noise.reshape(self.size_SCO)
+        return self.Gt + self.noise_by_step[t-1].reshape(self.size_SCO)
 
 
     def update(self, x, y, T, t):
