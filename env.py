@@ -92,17 +92,6 @@ class bandits_env:
         self.logger.record('time', time.time())
         self.multi = params['bandit']['multi']
 
-    def generate_context_value(self, value, n):
-        u, _, _ = np.linalg.svd(self.theta)
-        null_space = u[:,1:]
-        coefs = np.random.normal(0, 1, size = (self.d - 1, n))
-        for i in range(coefs.shape[1]):
-            coefs[:, i] /= sqrt(coefs[:, i].T.dot(coefs[:, i]))
-        assert np.all(np.all(coefs == 0, axis = 1) == False), "All zero happens"
-        beta = null_space.dot(coefs)
-        contexts = value*self.theta + sqrt(1-value**2)*beta
-        return contexts
-
     def run(self):
         np.random.seed(self.random_seed)
         
