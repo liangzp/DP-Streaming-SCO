@@ -1,7 +1,7 @@
 # On Optimal Private Online Stochastic Optimization and High Dimensional Decision Making
 
 This repository is the official implementation of [On Optimal Private Online Stochastic Optimization and High
-Dimensional Decision Making]() by Yuxuan Han, Zhicong Liang, Zhipeng Liang, Yang Wang, Yuan Yao and Jiheng Zhang.
+Dimensional Decision Making](https://arxiv.org/pdf/2206.08111.pdf) by Yuxuan Han, Zhicong Liang, Zhipeng Liang, Yang Wang, Yuan Yao and Jiheng Zhang.
 
 ## Requirements:
 
