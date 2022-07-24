@@ -426,14 +426,7 @@ class OFW_pge2(Algo):
         else:
             self.q = self.p / (self.p - 1)
         self.kappa_q = self.d ** (1 - 2/self.p)
-        self.kappa_q_plus = 1
-
-        # for p > 2
-        # kappa_q = self.d ** (1 - 2/self.p)
-        # kappa_q_plus = 1
-        # noise_norm = 2
-        ### sigma = xxxx  remove(kappa_q)
-        # only noise is p=2
+        # self.kappa_q_plus = 1
 
         self.sigma_plus = self.get_sigma_plus()
         self.noises = self.get_noise()
@@ -442,7 +435,7 @@ class OFW_pge2(Algo):
 
     def get_sigma_plus(self):
         logn = np.ceil(np.log2(self.T)) + 1
-        sigma_plus_2 = 8 * logn ** 2 * np.log(logn / self.delta) * (
+        sigma_plus_2 = 8 * logn ** 2 * self.kappa_q * np.log(logn / self.delta) * (
                     self.L1 * 2 * self.r + self.L0) ** 2 / self.eps ** 2
         sigma_plus = sigma_plus_2 ** 0.5
         return sigma_plus
@@ -486,10 +479,10 @@ class OFW_pge2(Algo):
         noise_by_step = []
 
         for t in range(1, self.T+1):
-            noise_idx = np.array(self.get_noise_idx(t)) - 1
             if self.noise_free:
                 noise = np.zeros(shape=self.size_SCO)
             else:
+                noise_idx = np.array(self.get_noise_idx(t)) - 1
                 noise = self.noises[:, noise_idx].sum(axis=1)
             noise_by_step.append(noise)
 
