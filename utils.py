@@ -10,7 +10,7 @@ def GGPlus(d, p, sigma_plus):
     https://stats.stackexchange.com/questions/352668/generate-uniform-noise-from-a-p-norm-ball-x-p-leq-r
     '''
     shape = d/2
-    scale = 2*sigma_plus
+    scale = 2*sigma_plus**2
     r = np.random.gamma(shape = shape, scale = scale, size = (1)) ** 0.5
     eps = gennorm.rvs(p, size=(d)) + 1/float(p)
     s = np.random.binomial(1, 1/2, size = (d)) * 2 - 1
