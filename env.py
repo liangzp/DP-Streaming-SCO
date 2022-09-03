@@ -34,7 +34,13 @@ class SCO_steam_env:
         xs = np.random.normal(0, self.x_std, size=(self.T, self.d))
             # x /= np.abs(x).max()
         xs /= np.linalg.norm(xs, self.q, axis = 1, keepdims= True)
-        ys = xs.dot(theta)+ np.random.normal(0, self.y_std, size=(self.T, 1))
+        # print(xs.shape, xs.max().max())
+        # ys = xs.dot(theta) + np.random.normal(0, self.y_std, size=(self.T, 1))
+        # here we clip the noise to [-1, 1], to guarantee our lipschitz
+        noise = np.random.normal(0, self.y_std, size=(self.T, 1))
+        noise = noise.clip(-1,1)
+        ys = xs.dot(theta) + noise
+
 
         for t in range(self.T):
             x, y = xs[[t]], ys[[t]]
@@ -78,7 +84,10 @@ class SCO_batch_env:
         
         X = np.random.normal(0, self.x_std, size = (self.T, self.d))
         X = np.array([x/np.linalg.norm(x, self.q) for x in X])
-        y = X.dot(theta) + np.random.normal(0, self.y_std, size = (self.T, 1))
+        # here we clip the noise to [-1, 1], to guarantee our lipschitz
+        noise = np.random.normal(0, self.y_std, size=(self.T, 1))
+        noise = noise.clip(-1, 1)
+        y = X.dot(theta) + noise
         S = np.hstack((X,y))
         self.theta_hat = self.algo.train(S, theta, self.logger)
 
