@@ -436,8 +436,11 @@ class OFW_pge2(Algo):
     def get_sigma_plus(self):
         logn = np.ceil(np.log2(self.T)) + 1
         sigma_plus_2 = 8 * logn ** 2 * self.kappa_q * np.log(logn / self.delta) * (
-                    self.L1 * 2 * self.r + self.L0) ** 2 / self.eps ** 2
+                self.L1 * 2 * self.r + self.L0) ** 2 / self.eps ** 2
         sigma_plus = sigma_plus_2 ** 0.5
+        d_pow = 1 / 2 - 1 / self.p
+        sigma_plus = sigma_plus / self.d ** d_pow
+
         return sigma_plus
 
     def get_noise(self):
