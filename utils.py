@@ -31,7 +31,7 @@ def paras(self, params):
     self.test_flag = params['algo']['test_flag']
     self.x_std = params['env']['x_std']
     self.y_std = params['env']['y_std']
-    self.L0 = 4*params['env']['noise_norm'] # Lipschitz
+    self.L0 = 4 # Lipschitz
     self.L1 = 1 # smoothness
     self.size_SCO = (self.d, 1)
     self.size_bandits = (self.d, self.k)

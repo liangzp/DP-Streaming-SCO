@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from multiprocessing import Pool
 sys.path.append(os.path.abspath(__file__))
 
-def generate_params(algo, seed, p, d = 5, T = int(1e2), scale = 1, noise_norm=1, noise_free = False, test_flag = False
+def generate_params(algo, seed, p, d = 5, T = int(1e2), scale = 1, noise_free = False, test_flag = False
 ):  
     params = dict()
     params['env'] = {"random_seed": seed,
@@ -25,7 +25,6 @@ def generate_params(algo, seed, p, d = 5, T = int(1e2), scale = 1, noise_norm=1,
                      "y_std": 0.05,
                      "test_size": 1000, 
                      "test_freq" : 100,
-                     "noise_norm": noise_norm
                      }
 
     np.random.seed(seed)
@@ -81,8 +80,6 @@ if __name__ == '__main__':
                         help='total amount of random seeds')
     parser.add_argument('--grid_scale', type=float, default=[1e-1], nargs='+',
                         help='learning rate grid scale')
-    parser.add_argument('--noise_norm', type=float, default=1,
-                        help='control the range of noise in linear regression')
     parser.add_argument('--noise_free', type=lambda x:bool(int(x)), default=False, nargs='+',
                         help='we do not set noise when noise_free==1')
 
@@ -95,13 +92,12 @@ if __name__ == '__main__':
     test_flags = [True, False]
     random_seeds = list(range(args.n_random_seeds))
     algo = args.algo
-    noise_norms = [args.noise_norm]
     n_process = 5
     
     # parallel run
     print(f'using {n_process} processes')
     with Pool(processes = n_process) as pool:
-        collection_sources = pool.starmap(generate_params, product(algo, random_seeds, p, d, T, grid_scale, noise_norms, noises, test_flags))
+        collection_sources = pool.starmap(generate_params, product(algo, random_seeds, p, d, T, grid_scale, noises, test_flags))
     
     # output experiments result to the disk
     results_dict = dict()

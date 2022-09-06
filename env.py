@@ -10,7 +10,6 @@ class SCO_steam_env:
         self.x_std = params['env']['x_std']
         self.y_std = params['env']['y_std']
         self.p = params['env']['p']
-        self.noise_norm = params['env']['noise_norm']
         if np.isinf(self.p):
             self.q = 1
         else:
@@ -39,7 +38,6 @@ class SCO_steam_env:
         # ys = xs.dot(theta) + np.random.normal(0, self.y_std, size=(self.T, 1))
         # here we clip the noise to [-1, 1], to guarantee our lipschitz
         noise = np.random.normal(0, self.y_std, size=(self.T, 1))
-        noise = noise.clip(-self.noise_norm, self.noise_norm)
         ys = xs.dot(theta) + noise
 
 
@@ -59,6 +57,8 @@ class SCO_steam_env:
         self.logger.record('baseline', self.baseline)
         self.logger.record('end time', time.time())
 
+        print(self.logger.dict['record'][-1], self.logger.dict['baseline'][0])
+
 
 
 
@@ -71,7 +71,6 @@ class SCO_batch_env:
         self.y_std = params['env']['y_std']
         self.algo = params['algo']['type']
         self.p = params['env']['p']
-        self.noise_norm = params['env']['noise_norm']
         if np.isinf(self.p):
             self.q = 1
         else:
@@ -88,7 +87,6 @@ class SCO_batch_env:
         X = np.array([x/np.linalg.norm(x, self.q) for x in X])
         # here we clip the noise to [-1, 1], to guarantee our lipschitz
         noise = np.random.normal(0, self.y_std, size=(self.T, 1))
-        noise = noise.clip(-self.noise_norm, self.noise_norm)
         y = X.dot(theta) + noise
         S = np.hstack((X,y))
         self.theta_hat = self.algo.train(S, theta, self.logger)
