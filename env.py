@@ -30,13 +30,8 @@ class SCO_steam_env:
 
         self.logger.record('time', time.time())
 
-        #theta = np.random.normal(0, self.x_std, size = (self.d, 1))
         xs = np.random.normal(0, self.x_std, size=(self.T, self.d))
-            # x /= np.abs(x).max()
         xs /= np.linalg.norm(xs, self.q, axis = 1, keepdims= True)
-        # print(xs.shape, xs.max().max())
-        # ys = xs.dot(theta) + np.random.normal(0, self.y_std, size=(self.T, 1))
-        # here we clip the noise to [-1, 1], to guarantee our lipschitz
         noise = np.random.normal(0, self.y_std, size=(self.T, 1))
         ys = xs.dot(theta) + noise
 
@@ -58,9 +53,6 @@ class SCO_steam_env:
         self.logger.record('end time', time.time())
 
         print(self.logger.dict['record'][-1], self.logger.dict['baseline'][0])
-
-
-
 
 
 class SCO_batch_env:
@@ -85,7 +77,6 @@ class SCO_batch_env:
         
         X = np.random.normal(0, self.x_std, size = (self.T, self.d))
         X = np.array([x/np.linalg.norm(x, self.q) for x in X])
-        # here we clip the noise to [-1, 1], to guarantee our lipschitz
         noise = np.random.normal(0, self.y_std, size=(self.T, 1))
         y = X.dot(theta) + noise
         S = np.hstack((X,y))
