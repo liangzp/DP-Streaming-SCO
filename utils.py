@@ -31,13 +31,28 @@ def paras(self, params):
     self.test_flag = params['algo']['test_flag']
     self.x_std = params['env']['x_std']
     self.y_std = params['env']['y_std']
-    self.L0 = 4 # Lipschitz
+    self.L0 = params['env']['lip'] # Lipschitz
     self.L1 = 1 # smoothness
     self.size_SCO = (self.d, 1)
     self.size_bandits = (self.d, self.k)
     self.eps, self.delta = params['prv']['eps'], params['prv']['delta']
     self.random_seed = params['env']['random_seed']
     self.logger = params['logger']
+
+
+def clip(grad, lip, q):
+    size = grad.shape
+    grad = grad.flatten()
+    if np.linalg.norm(grad, q) > lip:
+        con = lambda x: np.linalg.norm(x, q)
+        nlc = NonlinearConstraint(con, 0, lip)
+        fun = lambda x: np.linalg.norm((x-grad), q)
+        x_init = np.zeros_like(grad)
+        clip_grad = minimize(fun, x_init, constraints=nlc).x
+    else:
+        clip_grad = grad
+    clip_grad = clip_grad.reshape(size)
+    return clip_grad
 
 
 def compute_linear_gradient(theta_, x, y):

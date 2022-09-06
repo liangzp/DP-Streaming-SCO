@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from multiprocessing import Pool
 sys.path.append(os.path.abspath(__file__))
 
-def generate_params(algo, seed, p, d = 5, T = int(1e2), scale = 1, noise_free = False, test_flag = False
+def generate_params(algo, seed, p, d = 5, T = int(1e2), scale = 1, lip=1, noise_free = False, test_flag = False
 ):  
     params = dict()
     params['env'] = {"random_seed": seed,
@@ -25,6 +25,7 @@ def generate_params(algo, seed, p, d = 5, T = int(1e2), scale = 1, noise_free = 
                      "y_std": 0.05,
                      "test_size": 1000, 
                      "test_freq" : 100,
+                     "lip": lip,
                      }
 
     np.random.seed(seed)
@@ -82,11 +83,14 @@ if __name__ == '__main__':
                         help='learning rate grid scale')
     parser.add_argument('--noise_free', type=lambda x:bool(int(x)), default=False, nargs='+',
                         help='we do not set noise when noise_free==1')
+    parser.add_argument('--lip', type=float, default=[1], nargs='+',
+                        help='lipschitz')
 
     args = parser.parse_args()
     p = [np.inf if (p_ =='inf') else float(p_) for p_ in args.p]
     T = [int(T_) for T_ in args.T]
     d = [int(d_) for d_ in args.d]
+    lip = [lip_ for lip_ in args.lip]
     grid_scale = args.grid_scale
     noises = args.noise_free
     test_flags = [True, False]
@@ -97,7 +101,7 @@ if __name__ == '__main__':
     # parallel run
     print(f'using {n_process} processes')
     with Pool(processes = n_process) as pool:
-        collection_sources = pool.starmap(generate_params, product(algo, random_seeds, p, d, T, grid_scale, noises, test_flags))
+        collection_sources = pool.starmap(generate_params, product(algo, random_seeds, p, d, T, grid_scale, lip, noises, test_flags))
     
     # output experiments result to the disk
     results_dict = dict()

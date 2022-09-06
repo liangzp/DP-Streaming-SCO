@@ -1,7 +1,7 @@
 from cmath import nan
 import numpy as np
 from math import log, sqrt
-from utils import compute_linear_gradient, paras, GGPlus, lp_projection, Proj_inf
+from utils import compute_linear_gradient, paras, GGPlus, lp_projection, Proj_inf, clip
 from scipy.optimize import NonlinearConstraint, minimize
 import copy
 import matplotlib.pyplot as plt
@@ -69,7 +69,7 @@ class NoisySFW(Algo):
             GGNoise = np.zeros(shape = self.size_SCO)
         else:
             GGNoise = GGPlus(self.d, self.kappa_q_plus, sigma) 
-        nabla = np.mean([compute_linear_gradient(theta0, s[:-1], s[-1]) for s in B0], axis = 0).reshape((-1, 1))\
+        nabla = np.mean([clip(compute_linear_gradient(theta0, s[:-1], s[-1]), self.L0, self.q) for s in B0], axis = 0).reshape((-1, 1))\
                 + GGNoise.reshape((-1, 1))
         theta1 = (1-eta)*theta0 + eta * argmin(nabla, self.p, r)
         sigma = sqrt((32*self.kappa_q*self.L1**2*M**2*eta**2*log(1/self.delta))/(n*self.eps**2))
@@ -81,7 +81,7 @@ class NoisySFW(Algo):
                 GGNoise = np.zeros(shape = self.size_SCO)
             else:
                 GGNoise = GGPlus(self.d, self.kappa_q_plus, sigma).reshape((-1, 1)) 
-            grad = np.mean([compute_linear_gradient(theta1, s[:-1], s[-1]) - compute_linear_gradient(theta0, s[:-1], s[-1]) for s in B], axis = 0).reshape((-1, 1))\
+            grad = np.mean([clip(compute_linear_gradient(theta1, s[:-1], s[-1]), self.L0, self.q) - clip(compute_linear_gradient(theta0, s[:-1], s[-1]), self.L0, self.q) for s in B], axis = 0).reshape((-1, 1))\
                 + GGNoise
             nabla += grad
             theta0 = copy.deepcopy(theta1)
@@ -135,7 +135,7 @@ class NoisySGD(Algo):
             i = indices[t]
             GGNoise = GGNoises[t]
             etat = r/(self.L0*n*max(sqrt(n), sqrt(self.d*log(1/self.delta))/self.eps))*self.lr_scale
-            theta1 = proj(theta1 - etat*(compute_linear_gradient(theta1, X[i].reshape((-1, 1)), Y[i]).reshape((-1, 1)) + GGNoise))
+            theta1 = proj(theta1 - etat*(clip(compute_linear_gradient(theta1, X[i].reshape((-1, 1)), Y[i]).reshape((-1, 1)), self.L0, self.q) + GGNoise))
             theta_list.append(theta1)
             if t%(n**2//self.test_freq)==0:
                 self.test(t, theta1)
@@ -161,22 +161,27 @@ class OFW_ple2(Algo):
         self.kappa_q = min(self.q - 1, np.exp(1) ** 2 * (np.log(self.d) - 1))
         self.kappa_q_plus = min(self.q - 1, np.log(self.d) - 1)
 
-        self.sigma_plus = self.get_sigma_plus()
-
         self.noises = self.get_noise()
         self.noise_by_step = self.get_noise_by_step()
 
-    def get_sigma_plus(self):
+    def lr_scheduler(self, t):
+        etat = 1 / (t + 1)
+        etat = etat * self.lr_scale
+        return etat
+
+    def get_sigma_plus(self, t):
+        etat = self.lr_scheduler(t)
         logn = np.ceil(np.log2(self.T)) + 1
         sigma_plus_2 = 8 * logn ** 2 * self.kappa_q * np.log(logn / self.delta) * (
-                    self.L1 * 2 * self.r + self.L0) ** 2 / self.eps ** 2
+                    self.L1 * 2 * self.r * (t+1) * etat + self.L0) ** 2 / self.eps ** 2
         sigma_plus = sigma_plus_2 ** 0.5
         return sigma_plus
 
     def get_noise(self):
         noises = np.zeros((self.d, self.T))
         for i in range(self.T):
-            noises[:, i] = GGPlus(self.d, self.kappa_q_plus, self.sigma_plus)
+            sigma_plus = self.get_sigma_plus(i)
+            noises[:, i] = GGPlus(self.d, self.kappa_q_plus, sigma_plus)
         return noises
 
     def push_gt(self, gt):
@@ -235,6 +240,8 @@ class OFW_ple2(Algo):
 
         gradient0, gradient1 = compute_linear_gradient(self.theta_hat_old, x, y), compute_linear_gradient(
             self.theta_hat, x, y)
+        gradient0 = clip(gradient0, self.L0, self.q)
+        gradient1 = clip(gradient1, self.L0, self.q)
         gt = (t + 1) * gradient1 - t * gradient0
         self.push_gt(gt)
         Gt = self.get_Gt(t)
@@ -428,15 +435,19 @@ class OFW_pge2(Algo):
         self.kappa_q = self.d ** (1 - 2/self.p)
         # self.kappa_q_plus = 1
 
-        self.sigma_plus = self.get_sigma_plus()
         self.noises = self.get_noise()
-
         self.noise_by_step = self.get_noise_by_step()
 
-    def get_sigma_plus(self):
+    def lr_scheduler(self, t):
+        etat = 1 / (t + 1)
+        etat = etat * self.lr_scale
+        return etat
+
+    def get_sigma_plus(self, t):
+        etat = self.lr_scheduler(t)
         logn = np.ceil(np.log2(self.T)) + 1
         sigma_plus_2 = 8 * logn ** 2 * self.kappa_q * np.log(logn / self.delta) * (
-                self.L1 * 2 * self.r + self.L0) ** 2 / self.eps ** 2
+                self.L1 * 2 * self.r * (t+1) * etat + self.L0) ** 2 / self.eps ** 2
         sigma_plus = sigma_plus_2 ** 0.5
         d_pow = 1 / 2 - 1 / self.p
         sigma_plus = sigma_plus / self.d ** d_pow
@@ -446,7 +457,8 @@ class OFW_pge2(Algo):
     def get_noise(self):
         noises = np.zeros((self.d, self.T))
         for i in range(self.T):
-            noises[:, i] = GGPlus(self.d, 2, self.sigma_plus)
+            sigma_plus = self.get_sigma_plus(i)
+            noises[:, i] = GGPlus(self.d, 2, sigma_plus)
         return noises
 
     def push_gt(self, gt):
@@ -498,13 +510,15 @@ class OFW_pge2(Algo):
     def update(self, x, y, T, t):
 
         t = t + 1  # python starting from 0, while our algo starts from 1
-        self.etat, self.rhot = 1 / (t + 1), 1 / (t + 1)
-
-        self.etat = self.etat * self.lr_scale
+        self.rhot = 1 / (t + 1)
         self.rhot = self.rhot * self.lr_scale
+
+        self.etat = self.lr_scheduler(t)
 
         gradient0, gradient1 = compute_linear_gradient(self.theta_hat_old, x, y), compute_linear_gradient(
             self.theta_hat, x, y)
+        gradient0 = clip(gradient0, self.L0, self.q)
+        gradient1 = clip(gradient1, self.L0, self.q)
         gt = (t + 1) * gradient1 - t * gradient0
         self.push_gt(gt)
         Gt = self.get_Gt(t)
