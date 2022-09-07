@@ -381,7 +381,7 @@ class Local_MD(Algo):
 
             for j in range(1, T + 1):
                 subsubS = np.random.choice(range(0, subS.shape[0]), b_i, replace=False)
-                grad = np.mean([compute_linear_gradient(theta0, subS[s, :-1], subS[s, -1]) for s in subsubS],
+                grad = np.mean([clip(compute_linear_gradient(theta0, subS[s, :-1], subS[s, -1]), self.L0, self.q) for s in subsubS],
                                axis=0).reshape((-1, 1))
                 sigma = 100 * self.L0 * (self.d ** (1 - 2 / self.q) * np.log(1 / self.delta)) ** 0.5 / (b_i * eps_i)
 
