@@ -46,8 +46,9 @@ def clip(grad, lip, q):
     if np.linalg.norm(grad, q) > lip:
         con = lambda x: np.linalg.norm(x, q)
         nlc = NonlinearConstraint(con, 0, lip)
-        fun = lambda x: np.linalg.norm((x-grad), q)
-        x_init = np.zeros_like(grad)
+        fun = lambda x: np.linalg.norm(x-grad, q)
+        # x_init = np.zeros_like(grad)
+        x_init = grad / np.linalg.norm(grad, q)
         clip_grad = minimize(fun, x_init, constraints=nlc).x
     else:
         clip_grad = grad

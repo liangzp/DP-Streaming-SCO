@@ -94,7 +94,7 @@ class NoisySFW(Algo):
 
 class NoisySGD(Algo):
     '''
-    Algorithm 2 in Stability of Stochastic Gradient Descent on Nonsmooth Convex Losses for 2<p<=infty
+    Algorithm 4 in Stability of Stochastic Gradient Descent on Nonsmooth Convex Losses for 2<p<=infty
     Learning rate should be <=1. Be careful, the noise is in scaling of learning rate
     '''
     def __init__(self, params):
