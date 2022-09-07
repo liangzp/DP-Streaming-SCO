@@ -25,7 +25,7 @@ for file_name in glob.glob('../results/*/*.pkl'):
             out.write(',risk_mean,risk_std,time_mean,time_std, improvement\n')
         else:
             out = open(summary_file, 'a')
-        44
+
         out.write("{},{},{},{},{},{}\n".format(file_name.split('/')[-1][:-4], str(risk_mean), str(risk_std), str(time_mean), str(time_std), str(subopt)))
         out.close()
 
