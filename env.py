@@ -82,6 +82,8 @@ class SCO_batch_env:
         S = np.hstack((X,y))
         self.theta_hat = self.algo.train(S, theta, self.logger)
 
+        print(self.logger.dict['record'][-1], self.logger.dict['baseline'][0])
+
 
 class bandits_env:
     def __init__(self, params):
