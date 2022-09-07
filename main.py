@@ -79,7 +79,7 @@ if __name__ == '__main__':
                         help='dimension')
     parser.add_argument('--n_random_seeds', type = int, default = 5,
                         help='total amount of random seeds')
-    parser.add_argument('--grid_scale', type=float, default=[1e-1], nargs='+',
+    parser.add_argument('--grid_scale', type=float, default=[1], nargs='+',
                         help='learning rate grid scale')
     parser.add_argument('--noise_free', type=lambda x:bool(int(x)), default=False, nargs='+',
                         help='we do not set noise when noise_free==1')
