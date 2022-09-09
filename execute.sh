@@ -18,7 +18,6 @@
 ### new version
 
 # SCO
-### noise free=False
 /usr/bin/python3 main.py --p 1.5 --noise_free 0 --algo OFW_ple2 --n_random_seeds 10 --d 5 10 20 50 --T 1000 2000 5000 10000;
 /usr/bin/python3 main.py --p 1.5 --noise_free 1 --algo OFW_ple2 --n_random_seeds 10 --d 5 10 20 50 --T 1000 2000 5000 10000;
 
@@ -30,3 +29,7 @@
 
 /usr/bin/python3 main.py --p inf --noise_free 0 --algo NoisySGD --n_random_seeds 10 --d 5 10 20 50 --T 1000 2000 5000 10000;
 /usr/bin/python3 main.py --p inf --noise_free 1 --algo NoisySGD --n_random_seeds 10 --d 5 10 20 50 --T 1000 2000 5000 10000;
+
+# bandit
+#nohup /usr/bin/python3 main.py --p 1 --noise_free 0  --algo OFW_peq1 --n_random_seeds 10 --d 10 20 50 --T 1000 2000 5000 10000&
+#nohup /usr/bin/python3 main.py --p 1 --noise_free 0  --algo DPUCB    --n_random_seeds 10 --d 10 20 50 --T 1000 2000 5000 10000&
