@@ -284,6 +284,8 @@ class OFW_peq1(Algo):
 
         gradient0, gradient1 = compute_linear_gradient(self.theta_hat_old, x, y), compute_linear_gradient(
             self.theta_hat, x, y)
+        gradient0 = clip(gradient0, slef.L0, self.q)
+        gradient1 = clip(gradient1, slef.L0, self.q)
         gt = (t + 1) * gradient1 - t * gradient0
         self.push_gt(gt)
         Gt = self.get_Gt(t)
