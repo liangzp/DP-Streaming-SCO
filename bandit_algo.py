@@ -2,7 +2,7 @@
 from cmath import nan
 import numpy as np
 from math import log, sqrt, floor, log2, ceil
-from utils import compute_linear_gradient, paras
+from utils import compute_linear_gradient, paras, clip
 from scipy.optimize import NonlinearConstraint, minimize
 import copy
 import matplotlib.pyplot as plt
@@ -89,6 +89,8 @@ class OFW_peq1(Algo):
 
         gradient0, gradient1 = compute_linear_gradient(self.theta_hat_old[:, at], x, y), compute_linear_gradient(
             self.theta_hat[:, at], x, y)
+        gradient0 = clip(gradient0, self.L0, np.inf)
+        gradient1 = clip(gradient1, self.L0, np.inf)
         self.dt = gradient1 + (1-self.rhot)*(self.dt - gradient0) # when t=1, dt = 0. Thus I ignore the classification for t = 1 and t neq 1
         Lap = 4*sqrt(log(self.T)*log(1/self.delta))/(self.eps*sqrt((t+1)))
         max_indice = np.argmax(np.abs(self.dt + np.random.laplace(0, Lap, size = self.dt.shape))) # 
