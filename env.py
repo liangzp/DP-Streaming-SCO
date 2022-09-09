@@ -52,7 +52,10 @@ class SCO_steam_env:
         self.logger.record('baseline', self.baseline)
         self.logger.record('end time', time.time())
 
-        print(self.logger.dict['record'][-1], self.logger.dict['baseline'][0])
+        if self.test_flag:
+            print(self.T, self.d, self.p, self.algo.__class__.__name__, self.logger.dict['record'][-1], self.logger.dict['baseline'][0])
+        else:
+            print(self.T, self.d, self.p, self.algo.__class__.__name__)
 
 
 class SCO_batch_env:
@@ -82,8 +85,10 @@ class SCO_batch_env:
         S = np.hstack((X,y))
         self.theta_hat = self.algo.train(S, theta, self.logger)
 
-        print(self.logger.dict['record'][-1], self.logger.dict['baseline'][0])
-
+        if self.test_flag:
+            print(self.T, self.d, self.p, self.algo.__class__.__name__, self.logger.dict['record'][-1], self.logger.dict['baseline'][0])
+        else:
+            print(self.T, self.d, self.p, self.algo.__class__.__name__)
 
 class bandits_env:
     def __init__(self, params):
