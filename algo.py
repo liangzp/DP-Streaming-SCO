@@ -137,7 +137,7 @@ class NoisySGD(Algo):
             etat = r/(self.L0*n*max(sqrt(n), sqrt(self.d*log(1/self.delta))/self.eps))*self.lr_scale
             theta1 = proj(theta1 - etat*(clip(compute_linear_gradient(theta1, X[i].reshape((-1, 1)), Y[i]).reshape((-1, 1)), self.L0, self.q) + GGNoise))
             theta_list.append(theta1)
-            if t%(n**2//self.test_freq)==0:
+            if self.test_flag==True and t%(n**2//self.test_freq)==0:
                 self.test(t, theta1)
 
         self.logger.record('time', time.time() - self.logger.dict['time'][0])
