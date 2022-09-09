@@ -96,7 +96,7 @@ if __name__ == '__main__':
     test_flags = [True, False]
     random_seeds = list(range(args.n_random_seeds))
     algo = args.algo
-    n_process = 5
+    n_process = 30
     
     # parallel run
     print(f'using {n_process} processes')
