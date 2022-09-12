@@ -114,7 +114,8 @@ class NoisySGD(Algo):
         n = S.shape[0]
         sigma = sqrt(8*self.L0**2*log(1/self.delta)/self.eps**2)
         theta1 = np.zeros(shape = (self.d, 1))
-        theta_list = list()
+        # theta_list = list()
+        theta_avg = np.zeros(shape=(self.d, 1))
         if self.noise_free: 
             noise_mechanism = functools.partial(int, 0)
         else:
@@ -127,21 +128,24 @@ class NoisySGD(Algo):
 
         # initial time
         self.logger.record('time', time.time())
-        indices = np.random.choice(n, n**2)
+        # indices = np.random.choice(n, n**2)
         # GGNoises = [noise_mechanism() for _ in range(n**2-1)]
         X = S[:, :-1]
         Y = S[:, -1]
-        for t in range(n**2-1):
-            i = indices[t]
+        # for t in range(n**2-1):
+        for t in range(1, n**2+1):
+            i = np.random.choice(n, 1)
             GGNoise = noise_mechanism()
             etat = r/(self.L0*n*max(sqrt(n), sqrt(self.d*log(1/self.delta))/self.eps))*self.lr_scale
             theta1 = proj(theta1 - etat*(clip(compute_linear_gradient(theta1, X[i].reshape((-1, 1)), Y[i]).reshape((-1, 1)), self.L0, self.q) + GGNoise))
-            theta_list.append(theta1)
-            if self.test_flag==True and t%(n**2//self.test_freq)==0:
-                self.test(t, theta1)
+            # theta_list.append(theta1)
+            theta_avg += theta1 / n**2
+            if (self.test_flag==True) and t%(n**2//self.test_freq)==0:
+                self.test(t, (theta_avg * n**2)/(t+1))
 
         self.logger.record('time', time.time() - self.logger.dict['time'][0])
-        return np.mean(theta_list, axis = 0)
+        # return np.mean(theta_list, axis = 0)
+        return theta_avg
 
 
 class OFW_ple2(Algo):
