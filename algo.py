@@ -128,12 +128,12 @@ class NoisySGD(Algo):
         # initial time
         self.logger.record('time', time.time())
         indices = np.random.choice(n, n**2)
-        GGNoises = [noise_mechanism() for _ in range(n**2-1)]
+        # GGNoises = [noise_mechanism() for _ in range(n**2-1)]
         X = S[:, :-1]
         Y = S[:, -1]
         for t in range(n**2-1):
             i = indices[t]
-            GGNoise = GGNoises[t]
+            GGNoise = noise_mechanism()
             etat = r/(self.L0*n*max(sqrt(n), sqrt(self.d*log(1/self.delta))/self.eps))*self.lr_scale
             theta1 = proj(theta1 - etat*(clip(compute_linear_gradient(theta1, X[i].reshape((-1, 1)), Y[i]).reshape((-1, 1)), self.L0, self.q) + GGNoise))
             theta_list.append(theta1)
