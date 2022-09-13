@@ -63,8 +63,9 @@ def compute_linear_gradient(theta_, x, y):
 def lp_projection(x0, r, p):
     shape = x0.shape
     x0 = x0.flatten()
-    fun = lambda x: np.linalg.norm(x-x0, 2) 
-    x_init = np.zeros(shape = (x0.shape[0]))
+    fun = lambda x: np.linalg.norm(x-x0, p)
+    # x_init = np.zeros(shape = (x0.shape[0]))
+    x_init = x0 / np.linalg.norm(x0, p)
     con = lambda x: np.linalg.norm(x, p)
     nlc = NonlinearConstraint(con, 0, r)
     res = minimize(fun, x_init, constraints = nlc).x
