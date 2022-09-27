@@ -54,6 +54,9 @@ def generate_params(algo, seed, p, d = 5, T = int(1e2), scale = 1, lip=1, noise_
     elif algo=='NoisySGD':
         params['algo']['type'] = NoisySGD(params)
         env = SCO_batch_env(params)
+    elif algo == 'PhaseSGD':
+        params['algo']['type'] = PhaseSGD(params)
+        env = SCO_batch_env(params)
     elif algo=='DPUCB':
         params['algo']['type'] = DPUCB(params)
         params['bandit']['multi'] = False

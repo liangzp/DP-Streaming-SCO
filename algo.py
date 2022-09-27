@@ -551,3 +551,81 @@ class OFW_pge2(Algo):
             reward.append(self.theta_hat.T.dot(X[:, i]))
         at = np.argmax(reward)
         return at
+
+
+class PhaseSGD(Algo):
+    '''
+    Algorithm 2 in Private Stochastic Convex Optimization- Optimal Rates in Linear Time
+    '''
+
+    def __init__(self, params):
+        paras(self, params)
+        self.random_seed = params['env']['random_seed']
+        self.p = params['env']['p']
+        if np.isinf(self.p):
+            self.q = 1
+        else:
+            self.q = self.p / (self.p - 1)
+
+    def PSGD(self, theta0, eta_i, n_i, XY):
+        theta_list = [copy.deepcopy(theta0)]
+        for j in range(n_i):
+            grad = compute_linear_gradient(theta0, XY[j,:-1].reshape((-1, 1)), XY[j,-1])
+            grad = clip(grad, self.L0, self.q)
+            theta0 = theta0 - eta_i * grad
+            theta0 = lp_projection(theta0, self.r, self.p)
+            theta_list.append(copy.deepcopy(theta0))
+
+        theta_list = np.array(theta_list)
+        theta_avg = np.mean(theta_list, axis=0)
+        return theta_avg
+
+
+    def train(self, S, theta, logger):
+        self.logger = logger
+        super().train(theta)
+        r = np.linalg.norm(theta.flatten(), self.p)
+        self.r = r
+        D = 2 * r
+        n = S.shape[0]
+        self.theta_hat = np.zeros(self.size_SCO)
+
+        rho = self.eps / (2 * (np.log(1/self.delta))**0.5)
+        eta = (D / self.L0) * min(4/n**0.5, rho/self.d**0.5)
+
+        # initial time
+        self.logger.record('time', time.time())
+
+        k = int(np.ceil(np.log2(n)))
+        count = 0
+        for i in range(1, k+1):
+            n_i = int(2**(-1*i) * n)
+            if n_i <= 0:
+                continue
+
+            eta_i = 4**(-i) * eta
+
+            XY= S[count:count+n_i]
+            count += n_i
+
+            theta_avg = self.PSGD(copy.deepcopy(self.theta_hat), eta_i, n_i, XY)
+            sigma_i = 4 * self.L0 * eta_i / rho
+            noise = np.random.normal(size=self.size_SCO) * sigma_i
+            self.theta_hat = theta_avg + noise
+
+            if self.test_flag == True:
+                self.test(i-1, self.theta_hat)
+            self.logger.record('iteration', i-1)
+            self.logger.record('time', time.time() - self.logger.dict['time'][0])
+
+        return self.theta_hat
+
+
+
+
+
+
+
+
+
+
