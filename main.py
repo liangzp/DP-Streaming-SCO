@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from multiprocessing import Pool
 sys.path.append(os.path.abspath(__file__))
 
-def generate_params(algo, seed, p, d = 5, T = int(1e2), scale = 1, lip=1, noise_free = False, test_flag = False
+def generate_params(algo, seed, p, d = 5, T = int(1e2), scale = 1, lip=1, noise_free = False, test_flag = False, eps = 1
 ):  
     params = dict()
     params['env'] = {"random_seed": seed,
@@ -31,7 +31,7 @@ def generate_params(algo, seed, p, d = 5, T = int(1e2), scale = 1, lip=1, noise_
     np.random.seed(seed)
     
     logger = Logger()
-    params['prv'] = {"eps": 1,
+    params['prv'] = {"eps": eps,
                      "delta": 1/params['env']['T']}
     params['logger'] = logger
     params['algo'] = dict()
@@ -68,7 +68,7 @@ def generate_params(algo, seed, p, d = 5, T = int(1e2), scale = 1, lip=1, noise_
         
     env.run()
     params['result'] = env.logger.dict
-    return p, d, T, algo, str(scale), str(noise_free), str(test_flag), params
+    return p, d, T, algo, str(scale), str(noise_free), str(test_flag), str(eps), params
 
 if __name__ == '__main__':
     # parser argument in the command line
@@ -88,34 +88,36 @@ if __name__ == '__main__':
                         help='we do not set noise when noise_free==1')
     parser.add_argument('--lip', type=float, default=[1], nargs='+',
                         help='lipschitz')
+    # parser.add_argument('--eps', help='eps')
 
     args = parser.parse_args()
     p = [np.inf if (p_ =='inf') else float(p_) for p_ in args.p]
     T = [int(T_) for T_ in args.T]
     d = [int(d_) for d_ in args.d]
     lip = [lip_ for lip_ in args.lip]
+    eps = [0.1, 0.3, 0.5, 0.7, 0.9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     grid_scale = args.grid_scale
     noises = args.noise_free
     test_flags = [True, False]
     random_seeds = list(range(args.n_random_seeds))
     algo = args.algo
-    n_process = 30
+    n_process = 5
     
     # parallel run
     print(f'using {n_process} processes')
     with Pool(processes = n_process) as pool:
-        collection_sources = pool.starmap(generate_params, product(algo, random_seeds, p, d, T, grid_scale, lip, noises, test_flags))
+        collection_sources = pool.starmap(generate_params, product(algo, random_seeds, p, d, T, grid_scale, lip, noises, test_flags, eps))
     
     # output experiments result to the disk
     results_dict = dict()
     for collection_source in collection_sources:
-        p, d, T, algo, scale, noise_free, test_flag = collection_source[0], collection_source[1], collection_source[2], collection_source[3], collection_source[4], collection_source[5], collection_source[6]
+        p, d, T, algo, scale, noise_free, test_flag, eps = collection_source[0], collection_source[1], collection_source[2], collection_source[3], collection_source[4], collection_source[5], collection_source[6], collection_source[7]
         params = collection_source[-1]
         if abs(p-1.0)>1e-5 or str(p)=='inf':
             result_folder = 'dpsco-results'
         else:
             result_folder = 'bandits-results'
-        folder_name = "../{}/p={}-d={}-T={}-scale={}-noise_free={}-test_flag={}/".format(result_folder, str(p), str(d), str(T), str(scale),str(noise_free),str(test_flag))
+        folder_name = "../{}/p={}-d={}-T={}-scale={}-noise_free={}-test_flag={}-eps={}/".format(result_folder, str(p), str(d), str(T), str(scale),str(noise_free),str(test_flag), str(eps))
         if not folder_name in results_dict:
             results_dict[folder_name] = dict()
         if not algo in results_dict[folder_name]:
